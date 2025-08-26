@@ -1,8 +1,3 @@
-# HotelSphere
-Of course\! Here is a complete GitHub README writeup for the HotelSphere project, based on the provided report.
-
------
-
 # HotelSphere: An Integrated SQL Database for Hotel Chain Management
 
 ## 1\. Introduction
@@ -242,7 +237,3 @@ ORDER BY BookingMonth;
 ├── data.sql            # SQL DML scripts with sample data for population
 └── queries.sql         # Sample business intelligence SQL queries
 ```
-
-## 8\. License
-
-This project is distributed under the MIT License. See `LICENSE` for more information.
