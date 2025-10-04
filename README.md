@@ -1,239 +1,87 @@
-# HotelSphere: An Integrated SQL Database for Hotel Chain Management
+# HotelSphere :  Integrated Hotel Management Database Schema
 
 ## 1\. Introduction
 
-[cite\_start]HotelSphere is a centralized, end-to-end, enterprise-grade SQL database solution designed to manage the complex operations of a multi-location hotel chain[cite: 2, 17]. [cite\_start]Modern hotel chains often suffer from data fragmentation, where critical information is stored in separate, non-integrated systems, leading to data redundancy, operational inefficiency, and impaired decision-making[cite: 6, 10, 11, 14].
+This project provides a comprehensive and normalized relational database schema for an integrated hotel management system. The design logically separates business functions into three core modules: Customer Relationship Management (CRM), Enterprise Resource Planning (ERP), and Supply Chain Management (SCM).
 
-[cite\_start]This project solves these challenges by integrating Enterprise Resource Planning (ERP), Customer Relationship Management (CRM), and Supply Chain Management (SCM) modules into a single, cohesive, and normalized relational database[cite: 18]. [cite\_start]The primary goal is to ensure data integrity, eliminate redundancy, streamline operations, and provide powerful business intelligence capabilities to support strategic decision-making[cite: 19].
+The schema is designed to be robust, scalable, and maintainable, adhering to database normalization principles (up to Third Normal Form - 3NF) to ensure data integrity and minimize redundancy. It serves as the backend foundation for a full-scale hotel management application.
 
-## 2\. Key Features
+## 2\. Schema Description
 
-  * [cite\_start]**Integrated Management System**: A single, unified system combining modules for CRM, ERP (HR & Payroll), and SCM (Procurement & Inventory)[cite: 18, 613].
-  * [cite\_start]**Core Operations & CRM**: Manage hotel branches, room types, individual rooms, customer information, bookings, payments, and a customer loyalty program [cite: 23-40].
-  * [cite\_start]**Enterprise Resource Planning (ERP)**: Handle all staff information, including departments, job roles, employee records, and payroll processing [cite: 41-51].
-  * [cite\_start]**Supply Chain Management (SCM)**: Oversee suppliers, product catalogs, purchase orders, and track inventory levels in each hotel's dedicated warehouse [cite: 52-66].
-  * [cite\_start]**Fully Normalized & Scalable Architecture**: The database schema is normalized to Boyce-Codd Normal Form (BCNF) to guarantee data integrity, minimize redundancy, and prevent modification anomalies[cite: 264, 602]. [cite\_start]This robust architecture can easily scale to accommodate business growth[cite: 616].
+The database is structured into three distinct but interconnected modules, each representing a major functional area of the hotel business.
 
-## 3\. Database Schema (ER Diagram)
+  * **CRM Module:** Focuses on all customer-facing activities. It handles customer information, room bookings, payments, and feedback.
+  * **ERP Module:** Manages the internal resources and operations of the hotel. This includes employee and department management, role specialization, and task assignments.
+  * **SCM Module:** Deals with the procurement and management of goods. It tracks suppliers, products, purchase orders, and warehouse inventory.
 
-The database schema is built upon a detailed Entity-Relationship model that logically structures the business operations. [cite\_start]The final design consists of 18 relations, each normalized to BCNF to ensure a robust and efficient structure[cite: 299, 301].
+### Key Design Features
 
-[cite\_start]The ER Diagram below visualizes the entities, their key attributes, and the relationships between them[cite: 155].
+  * **Normalization:** The schema eliminates redundant data by breaking down complex tables. For example, multivalued attributes like phone numbers, room amenities, and product allergens are stored in separate linking tables to achieve 1NF. Transitive dependencies, such as `room price` depending on `room type`, have been resolved by creating a separate `room_type` table, thus satisfying 3NF.
+  * **Data Integrity:** Strong data integrity is enforced through primary keys, foreign key constraints, `UNIQUE` constraints, and `CHECK` constraints (e.g., feedback rating).
+  * **Specialization Hierarchy:** The ERP module implements an employee specialization hierarchy (`employee` -\> `manager`/`staff` -\> `general_manager`/`warehouse_manager`) to represent different roles and permissions cleanly.
+  * **Modularity:** The separation into CRM, ERP, and SCM allows for easier development, maintenance, and scaling of each part of the system independently.
 
-```mermaid
-erDiagram
-    CUSTOMER {
-        int CustomerID PK
-        varchar FirstName
-        varchar LastName
-        varchar Email
-        varchar PhoneNumber
-    }
-    BOOKING {
-        int BookingID PK
-        int CustomerID FK
-        int HotelID FK
-        int RoomID FK
-        date CheckInDate
-        date CheckOutDate
-        decimal TotalAmount
-    }
-    PAYMENT {
-        int PaymentID PK
-        int BookingID FK
-        date PaymentDate
-        decimal Amount
-    }
-    HOTEL {
-        int HotelID PK
-        varchar Name
-        varchar Address
-        varchar City
-    }
-    ROOM {
-        int RoomID PK
-        varchar RoomNumber
-        int HotelID FK
-        int RoomTypeID FK
-        varchar Status
-    }
-    ROOM_TYPE {
-        int RoomTypeID PK
-        varchar TypeName
-        decimal BasePrice
-    }
-    EMPLOYEE {
-        int EmployeeID PK
-        varchar FirstName
-        varchar LastName
-        int HotelID FK
-        int DeptID FK
-        int RoleID FK
-    }
-    DEPARTMENT {
-        int DeptID PK
-        varchar DeptName
-    }
-    ROLE {
-        int RoleID PK
-        varchar RoleName
-    }
-    PURCHASE_ORDER {
-        int PO_ID PK
-        int HotelID FK
-        int SupplierID FK
-        date OrderDate
-    }
-    ORDER_DETAIL {
-        int PO_ID PK, FK
-        int ProductID PK, FK
-        int Quantity
-        decimal UnitPrice
-    }
-    PRODUCT {
-        int ProductID PK
-        varchar ProductName
-        varchar Category
-    }
-    SUPPLIER {
-        int SupplierID PK
-        varchar SupplierName
-        varchar ContactPerson
-    }
+## 3\. Modules in Detail
 
-    CUSTOMER ||--o{ BOOKING : makes
-    BOOKING ||--|{ PAYMENT : has
-    HOTEL ||--o{ ROOM : has
-    HOTEL ||--o{ BOOKING : receives
-    HOTEL ||--o{ EMPLOYEE : employs
-    HOTEL ||--o{ PURCHASE_ORDER : places
-    ROOM_TYPE ||--o{ ROOM : categorizes
-    ROOM ||--o{ BOOKING : is_for
-    DEPARTMENT ||--o{ EMPLOYEE : has
-    ROLE ||--o{ EMPLOYEE : has
-    SUPPLIER ||--o{ PURCHASE_ORDER : receives
-    PURCHASE_ORDER ||--|{ ORDER_DETAIL : contains
-    PRODUCT ||--|{ ORDER_DETAIL : details
+### 3.1. Customer Relationship Management (CRM)
 
-```
+This module is the heart of guest interactions.
 
-> [cite\_start]*This diagram was generated using the Mermaid script provided in the project report[cite: 157, 158].*
+  * **Core Tables:** `branch`, `room`, `customer`, `booking`, `payment`, `feedback`.
+  * **Functionality:**
+      * Manages multiple hotel branches and their specific rooms.
+      * Stores detailed customer profiles.
+      * Handles the entire booking lifecycle from check-in to check-out.
+      * Processes payments and collects guest feedback for service improvement.
 
-## 4\. Technologies Used
+### 3.2. Enterprise Resource Planning (ERP)
 
-  * [cite\_start]**Database**: MySQL [cite: 320]
-  * **Language**: SQL (for DDL, DML, and querying)
+This module manages the hotel's internal workforce and administrative tasks.
 
-## 5\. Getting Started
+  * **Core Tables:** `department`, `employee`, `manager`, `staff`, `task`.
+  * **Functionality:**
+      * Organizes employees into departments and branches.
+      * Defines a clear hierarchy for staff and management roles.
+      * Assigns and tracks operational tasks for staff members.
 
-To get a local copy up and running, follow these simple steps.
+### 3.3. Supply Chain Management (SCM)
 
-### Prerequisites
+This module handles the logistics of inventory and procurement.
 
-You need a running instance of MySQL server. You can download it from the [official MySQL website](https://www.mysql.com/downloads/).
+  * **Core Tables:** `supplier`, `product`, `purchase_order`, `warehouse`, `inventory`.
+  * **Functionality:**
+      * Maintains a database of suppliers and the products they provide.
+      * Creates and tracks purchase orders.
+      * Manages inventory levels for various products within warehouses linked to specific hotel branches.
 
-### Installation
+## 4\. Setup and Usage
 
-1.  **Clone the repository:**
-    ```sh
-    git clone https://github.com/your_username/HotelSphere.git
-    ```
-2.  **Navigate to the project directory:**
-    ```sh
-    cd HotelSphere
-    ```
-3.  **Create the database:**
-    Log in to your MySQL server and create a new database.
-    ```sql
-    CREATE DATABASE HotelSphereDB;
-    ```
-4.  **Create the tables:**
-    [cite\_start]Run the `schema.sql` script to create all the necessary tables and relationships[cite: 318].
-    ```sh
-    mysql -u your_username -p HotelSphereDB < schema.sql
-    ```
-5.  **Populate the database (Optional):**
-    [cite\_start]Run the `data.sql` script to populate the tables with sample data for testing and demonstration[cite: 444, 445].
-    ```sh
-    mysql -u your_username -p HotelSphereDB < data.sql
-    ```
+To use this database schema, follow these steps:
 
-## 6\. Usage & Example Queries
+1.  **Schema Creation:** Execute the provided SQL script to create all the tables, relationships, and constraints.
+2.  **Data Population:** Run the corresponding data insertion script to populate the tables with realistic sample data. This will allow you to test queries and understand the table relationships.
+3.  **Querying:** Use the provided business queries as a starting point to interact with the database and retrieve meaningful business insights.
 
-[cite\_start]The HotelSphere database is designed to answer critical business questions and extract valuable insights[cite: 545]. Below are some examples of the analytical queries that can be performed.
+### Example Query
 
-#### Query 1: Get Current Occupancy Rate for a Specific Hotel
-
-[cite\_start]Calculates the percentage of rooms currently occupied in Hotel \#1[cite: 546].
+The following query retrieves a list of all employees working in the 'Front Desk' department, demonstrating a simple `JOIN` between the `employee` and `department` tables.
 
 ```sql
 SELECT
-    h.Name AS HotelName,
-    (COUNT(b.BookingID) / (SELECT COUNT(*) FROM Room WHERE HotelID = h.HotelID)) * 100 AS OccupancyRatePercentage
-FROM Hotel h
-LEFT JOIN Room r ON h.HotelID = r.HotelID
-LEFT JOIN Booking b ON r.RoomID = b.RoomID
+    e.name AS employee_name,
+    e.hire_date,
+    d.name AS department_name
+FROM
+    employee AS e
+JOIN
+    department AS d ON e.department_id = d.department_id
 WHERE
-    h.HotelID = 1 -- Change HotelID to check other hotels
-    AND CURDATE() BETWEEN b.CheckInDate AND b.CheckOutDate
-GROUP BY h.Name, h.HotelID;
+    d.name = 'Front Desk';
 ```
 
-#### Query 2: Find the Top 5 Most Valuable Customers
+## 5\. Potential Enhancements
 
-[cite\_start]Identifies the top 5 customers based on their total spending across all bookings[cite: 557].
-
-```sql
-SELECT
-    c.CustomerID,
-    c.FirstName,
-    c.LastName,
-    SUM(p.Amount) AS TotalSpent
-FROM Customer c
-JOIN Booking b ON c.CustomerID = b.CustomerID
-JOIN Payment p ON b.BookingID = p.BookingID
-GROUP BY c.CustomerID, c.FirstName, c.LastName
-ORDER BY TotalSpent DESC
-LIMIT 5;
-```
-
-#### Query 3: Identify Products Below Reorder Level
-
-[cite\_start]Helps managers find which products need to be reordered across all hotel warehouses by comparing current quantity against the reorder level[cite: 572].
-
-```sql
-SELECT
-    h.Name AS HotelName,
-    p.ProductName,
-    i.Quantity AS CurrentQuantity,
-    i.ReorderLevel
-FROM Inventory i
-JOIN Product p ON i.ProductID = p.ProductID
-JOIN Warehouse w ON i.WarehouseID = w.WarehouseID
-JOIN Hotel h ON w.HotelID = h.HotelID
-WHERE i.Quantity < i.ReorderLevel;
-```
-
-#### Query 4: Analyze Monthly Booking Trends
-
-[cite\_start]Provides a report on the total number of bookings per month to analyze seasonal trends and peak periods[cite: 584].
-
-```sql
-SELECT
-    DATE_FORMAT(CheckInDate, '%Y-%m') AS BookingMonth,
-    COUNT(BookingID) AS NumberOfBookings
-FROM Booking
-GROUP BY BookingMonth
-ORDER BY BookingMonth;
-```
-
-## 7\. Repository Structure
-
-```
-.
-├── README.md           # This file
-├── Project_Report.pdf  # The original detailed project report
-├── schema.sql          # SQL DDL scripts to create the database schema
-├── data.sql            # SQL DML scripts with sample data for population
-└── queries.sql         # Sample business intelligence SQL queries
-```
+  * **Views:** Create database views for simplified reporting (e.g., a `v_booking_details` view that joins booking, customer, and room information).
+  * **Triggers:** Implement triggers to automate actions, such as updating inventory levels in the `inventory` table whenever a `purchase_order` is marked as 'Delivered'.
+  * **Indexes:** Add indexes to frequently queried columns (e.g., `customer.name`, `room.branch_id`) to improve query performance.
+  * **Stored Procedures:** Develop stored procedures for common complex operations, such as creating a new booking, which would involve inserting records into multiple tables within a single transaction.
