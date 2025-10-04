@@ -1,0 +1,170 @@
+erDiagram
+    %% --- CRM MODULE ---
+    branch {
+        int branch_id PK
+        varchar location
+        int manager_id FK
+    }
+    branch_phone_numbers {
+        int branch_id PK, FK
+        varchar phone_number PK
+    }
+    room_type {
+        varchar type_name PK
+        decimal price
+    }
+    room {
+        int room_id PK
+        varchar room_number
+        int branch_id FK
+        varchar room_type_name FK
+    }
+    room_amenities {
+        int room_id PK, FK
+        varchar amenity PK
+    }
+    customer {
+        int customer_id PK
+        varchar name
+        varchar email
+    }
+    customer_phone_numbers {
+        int customer_id PK, FK
+        varchar phone_number PK
+    }
+    loyalty_program {
+        int program_id PK
+        int customer_id UK, FK
+        varchar tier_level
+    }
+    booking {
+        int booking_id PK
+        date check_in_date
+        date check_out_date
+        int customer_id FK
+        int room_id FK
+    }
+    booking_special_requests {
+        int booking_id PK, FK
+        varchar request PK
+    }
+    payment {
+        int payment_id PK
+        decimal amount
+        timestamp payment_date
+        int booking_id FK
+    }
+    feedback {
+        int feedback_id PK
+        int rating
+        text comments
+        int booking_id FK
+    }
+
+    %% --- ERP MODULE ---
+    department {
+        int department_id PK
+        varchar name UK
+    }
+    employee {
+        int employee_id PK
+        varchar name
+        date hire_date
+        decimal salary
+        int branch_id FK
+        int department_id FK
+    }
+    manager {
+        int employee_id PK, FK
+    }
+    staff {
+        int employee_id PK, FK
+    }
+    general_manager {
+        int employee_id PK, FK
+    }
+    warehouse_manager {
+        int employee_id PK, FK
+    }
+    task {
+        int task_id PK
+        text description
+        date due_date
+        int assigned_to_staff_id FK
+    }
+
+    %% --- SCM MODULE ---
+    supplier {
+        int supplier_id PK
+        varchar name
+        text contact_info
+    }
+    supplier_contact_persons {
+        int supplier_id PK, FK
+        varchar contact_person PK
+    }
+    product {
+        int product_id PK
+        varchar name
+        decimal price
+    }
+    product_allergens {
+        int product_id PK, FK
+        varchar allergen PK
+    }
+    purchase_order {
+        int order_id PK
+        date order_date
+        varchar status
+        int supplier_id FK
+    }
+    purchase_order_item {
+        int order_id PK, FK
+        int product_id PK, FK
+        int quantity
+    }
+    warehouse {
+        int warehouse_id PK
+        varchar location
+        int branch_id FK
+        int manager_id FK
+    }
+    inventory {
+        int inventory_id PK
+        int quantity_on_hand
+        int warehouse_id FK
+        int product_id FK
+    }
+
+
+    %% --- RELATIONSHIPS ---
+    branch                               ||--|{ room                         : "has"
+    branch                               ||--|{ branch_phone_numbers       : "has phone"
+    branch                               ||--|{ employee                     : "employs"
+    branch                               ||--o{ warehouse                    : "contains"
+    room_type                            ||--|{ room                         : "defines type for"
+    room                                 ||--|{ room_amenities               : "has amenity"
+    room                                 ||--o{ booking                      : "is booked in"
+    customer                             ||--o{ booking                      : "makes"
+    customer                             ||--o{ customer_phone_numbers       : "has phone"
+    customer                             }|--|| loyalty_program              : "has"
+    booking                              ||--o{ payment                      : "has"
+    booking                              }o--|| feedback                     : "receives"
+    booking                              ||--o{ booking_special_requests   : "has request"
+    department                           ||--|{ employee                     : "has"
+    staff                                ||--o{ task                         : "is assigned"
+    general_manager                      }|--|| branch                       : "manages"
+    warehouse_manager                    }|--|| warehouse                    : "manages"
+    supplier                             ||--o{ purchase_order             : "supplies"
+    supplier                             ||--|{ supplier_contact_persons   : "has contact"
+    purchase_order                       }o--|{ purchase_order_item        : "contains"
+    product                              }o--|{ purchase_order_item        : "is in"
+    product                              ||--o{ product_allergens          : "has allergen"
+    product                              }o--|{ inventory                    : "is tracked in"
+    warehouse                            ||--o{ inventory                    : "holds"
+    
+    %% --- ISA (Specialization) RELATIONSHIPS ---
+    employee --|| manager               : is_a
+    employee --|| staff                 : is_a
+    manager  --|| general_manager       : is_a
+    manager  --|| warehouse_manager     : is_a
