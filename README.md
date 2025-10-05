@@ -53,6 +53,9 @@ This module handles the logistics of inventory and procurement.
       * Maintains a database of suppliers and the products they provide.
       * Creates and tracks purchase orders.
       * Manages inventory levels for various products within warehouses linked to specific hotel branches.
+   
+ <img width="1688" height="1327" alt="EER diagram" src="https://github.com/user-attachments/assets/69cff56f-aac9-4a2f-ba12-e647aff0aec9" />
+
 
 ## 4\. Setup and Usage
 
