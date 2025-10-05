@@ -68,3 +68,25 @@ JOIN
     employee AS e ON t.assigned_to_staff_id = e.employee_id
 WHERE
     t.description = 'Prepare welcome kits for VIP guests';
+
+-- ==========================================================
+
+-- Query 6: identify the top 5 most valuable customers based on total spending in the past year.
+
+SELECT
+    c.customer_id,
+    c.name,
+    SUM(p.amount) AS total_spending
+FROM
+    customer c
+JOIN
+    booking b ON c.customer_id = b.customer_id
+JOIN
+    payment p ON b.booking_id = p.booking_id
+WHERE
+    p.payment_date >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+GROUP BY
+    c.customer_id, c.name
+ORDER BY
+    total_spending DESC
+LIMIT 5;
